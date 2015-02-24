@@ -58,12 +58,11 @@ minetest.register_craft({
 
 --TODO: -create a chest
 --		-better textures
---		-set attach: head has to be in elevator
 --		-write elevator name onto the door (sign like)
 
 local elevator = {
-	physical = true,
-	collisionbox = {-0.49,-0.5,-0.49, 0.49,1.5,0.49},
+	physical = false,
+	collisionbox = {-0.49,-0.49,-0.5, 0.49,1.5,0.49},
 	visual = "mesh",
 	mesh = "elevator.obj",
 	visual_size = {x=1, y=1},
@@ -191,15 +190,18 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			if entity.floorlist[entity.selected_floor] then
 				if not entity.driver then
 					entity.driver = player
-					player:set_look_yaw(elevator_func:round_yaw(entity.object:getyaw(),91))
-					--TODO: set_attach into 2 blocks, head is above the elevator
-					--entity.object:set_animation({x=0,y=20})
-					player:set_attach(entity.object, "", {x=0,y=5,z=0}, {x=0,y=0,z=0})
-					entity.object:set_animation({x=0,y=-1})
-					--player:set_animation({x=0,y=5})
+					player:set_look_yaw(elevator_func:round_yaw(entity.object:getyaw(), 91))
+					--entity.object:set_animation({x=0, y=20})
+					player:set_attach(entity.object, "", {x=0, y=5, z=0}, {x=0, y=0, z=0})
+					--player:set_animation({x=0, y=5})
+					--entity.object:set_animation({x=0, y=-1})
+					player:set_eye_offset({x=0, y=-3, z=0}, {x=0, y=0, z=0})
+					
 				end
-				local pos = entity.floorlist[entity.selected_floor].pos
-				entity:add_calling(pos)
+				if entity.driver == player then
+					local pos = entity.floorlist[entity.selected_floor].pos
+					entity:add_calling(pos)
+				end
 				lastformbyplayer[playername] = nil
 			end
 			return
@@ -207,11 +209,16 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			if entity.driver == player then 
 				entity.driver = nil
 				local pos = entity.object:getpos()
-				pos.x = entity.floor_pos.x
-				pos.z = entity.floor_pos.z
-				pos.y = pos.y+0.5
+				local pos_to = {}
+				pos_to.x = entity.floor_pos.x
+				pos_to.z = entity.floor_pos.z
+				pos_to.y = pos.y
+				--print(minetest.pos_to_string(pos_to))
+				--print(minetest.pos_to_string(player:getpos()))
 				player:set_detach()
-				player:moveto(pos)
+				player:set_animation({x=0, y=-5})
+				player:moveto(pos_to)
+				player:set_eye_offset({x=0, y=0 ,z=0}, {x=0, y=0, z=0})
 			end
 			lastformbyplayer[playername] = nil
 			return
@@ -287,6 +294,8 @@ function elevator:on_activate(staticdata, dtime_s)
 	self.object:set_armor_groups({immortal=1})
 	self.driver = nil
 	self.old_pos = self.object:getpos()
+	self.object:setvelocity({x=0, y=0, z=0})
+	self.velocity = 0;
 end
 
 function elevator:organice()
@@ -388,7 +397,7 @@ function elevator:on_step(dtime)
 				end
 			end
 
-			self.object:setvelocity({x=0,y=self.velocity,z=0})
+			self.object:setvelocity({x=0, y=self.velocity, z=0})
 			self.old_pos = self.object:getpos()
 			self.old_velocity = self.velocity
 		else
@@ -396,7 +405,7 @@ function elevator:on_step(dtime)
 			self.velocity = 0
 			self.old_pos = self.object:getpos()
 			self.old_velocity = self.velocity
-			self.object:setvelocity({x=0,y=self.velocity,z=0})
+			self.object:setvelocity({x=0, y=self.velocity, z=0})
 			self:organice()
 		end
 	else
@@ -404,14 +413,14 @@ function elevator:on_step(dtime)
 			self.velocity = 0
 			self.old_pos = self.object:getpos()
 			self.old_velocity = self.velocity
-			self.object:setvelocity({x=0,y=self.velocity,z=0})
+			self.object:setvelocity({x=0, y=self.velocity, z=0})
 		end
 	end
 end
 
 function elevator:stop_at_target(self, round_pos)
 	self.velocity = 0
-	self.object:setvelocity({x=0,y=0,z=0})
+	self.object:setvelocity({x=0, y=0, z=0})
 	self.object:moveto({x=round_pos.x, y=self.target.y, z=round_pos.z})
 	local name = minetest.get_node(self.target).name
 	name = name:sub(0,name:len()-4)
