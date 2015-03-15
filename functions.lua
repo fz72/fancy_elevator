@@ -15,7 +15,7 @@ function elevator_func:is_shaft(pos_get)
 					return false
 				end
 			else
-				if nodename ~= "air" and nodename ~= "elevator:ground" then
+				if nodename ~= "air" and nodename ~= "fancy_elevator:ground" then
 					return false
 				end
 			end
@@ -80,17 +80,18 @@ function elevator_func:get_elevater(pos_get)
 	while elevator_func:is_shaft(pos) do
 		pos.y = pos.y-1
 	end
+	pos.y = pos.y + 1
 	if pos.name ~= "air" then
-		pos.y = pos.y + 2 --one shaft needs to be under the last door
+		--pos.y = pos.y + 1 --one shaft needs to be under the last door
 	end
 	local all_objects = nil
-	while elevator_func:is_shaft(pos) do --TODO: elevator can be placed on another elevator
+	while elevator_func:is_shaft(pos) do
 		all_objects = minetest.get_objects_inside_radius(pos, 0.5)
 		if all_objects ~= nil then
 			for _,obj in pairs(all_objects) do
 				local entity = obj:get_luaentity()
 				if entity ~= nil and entity ~= last_entity then 
-					if entity.name == "elevator:elevator" then
+					if entity.name == "fancy_elevator:elevator" then
 						table.insert(elevators, entity)
 						last_entity = entity
 					end

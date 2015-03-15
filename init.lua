@@ -1,7 +1,7 @@
-dofile(minetest.get_modpath("elevator").."/functions.lua")
-dofile(minetest.get_modpath("elevator").."/doors.lua")
+dofile(minetest.get_modpath("fancy_elevator").."/functions.lua")
+dofile(minetest.get_modpath("fancy_elevator").."/doors.lua")
 
-minetest.register_node("elevator:shaft", {
+minetest.register_node("fancy_elevator:shaft", {
 	description = "Shaft",
 	tiles = {
 		"elevator_shaft_top.png", "elevator_shaft_top.png",
@@ -10,7 +10,7 @@ minetest.register_node("elevator:shaft", {
 	groups = {snappy=1, choppy=2, oddly_breakable_by_hand=2, shaft=1},
 })
 
-minetest.register_node("elevator:ground", {
+minetest.register_node("fancy_elevator:ground", {
 	description = "Elevator ground",
 	tiles = {"elevator_shaft_top.png", "elevator_shaft.png"},
 	is_ground_content = true,
@@ -21,7 +21,7 @@ minetest.register_node("elevator:ground", {
 	end
 })
 
-elevator_doors.register_door("elevator:door_gray", {
+elevator_doors.register_door("fancy_elevator:door_gray", {
 	description = "Elevator Door",
 	tiles_bottom = {"elevator_door_gray_b.png", "elevator_door_gray.png"},
 	tiles_top = {"elevator_door_gray_a.png", "elevator_door_gray.png"},
@@ -30,7 +30,7 @@ elevator_doors.register_door("elevator:door_gray", {
 })
 
 minetest.register_craft({
-	output = "elevator:shaft",
+	output = "fancy_elevator:shaft",
 	recipe = {
 		{"default:stone","group:wood"},
 		{"group:wood","default:stone"}
@@ -38,7 +38,7 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = "elevator:elevator",
+	output = "fancy_elevator:elevator",
 	recipe = {
 		{"group:wood","group:wood"},
 		{"default:steel_ingot","default:steel_ingot"},
@@ -47,7 +47,7 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = "elevator:door_gray",
+	output = "fancy_elevator:door_gray",
 	recipe = {
 		{"default:steel_ingot","default:steel_ingot"},
 		{"group:wood","default:steel_ingot"},
@@ -92,11 +92,11 @@ function elevator:on_punch(puncher, time_from_last_punch, tool_capabilities, dir
 		self.object:remove()
 		local inv = puncher:get_inventory()
 		if minetest.setting_getbool("creative_mode") then
-			if not inv:contains_item("main", "elevator:elevator") then
-				inv:add_item("main", "elevator:elevator")
+			if not inv:contains_item("main", "fancy_elevator:elevator") then
+				inv:add_item("main", "fancy_elevator:elevator")
 			end
 		else
-			inv:add_item("main", "elevator:elevator")
+			inv:add_item("main", "fancy_elevator:elevator")
 		end
 		return
 	end
@@ -231,7 +231,9 @@ function elevator:move_to(pos)
 	if pos.y ~= nil then
 		local round_pos = elevator_func:round_pos(self.object:getpos())
 		round_pos.y = round_pos.y - 1
-		minetest.remove_node(round_pos)
+		if minetest.get_node(round_pos).name == "fancy_elevator:ground" then
+			minetest.remove_node(round_pos)
+		end
 		self.target = pos
 		return true
 	else
@@ -241,9 +243,9 @@ function elevator:move_to(pos)
 end
 
 
-minetest.register_entity("elevator:elevator", elevator)
+minetest.register_entity("fancy_elevator:elevator", elevator)
 
-minetest.register_craftitem("elevator:elevator", {
+minetest.register_craftitem("fancy_elevator:elevator", {
 	description = "Elevator",
 	inventory_image = minetest.inventorycube("elevator_top.png", "elevator_side.png", "elevator_front.png"),
 	wield_image = "elevator_side.png",
@@ -268,14 +270,14 @@ minetest.register_craftitem("elevator:elevator", {
 				"In this shaft is already an elevator!")
 			if not minetest.setting_getbool("creative_mode") then
 				for i=1,added,1 do
-					itemstack:add_item("elevator:elevator")
+					itemstack:add_item("fancy_elevator:elevator")
 				end
 				return itemstack
 			else
 				return 
 			end
 		end
-		local entity = minetest.add_entity(pos, "elevator:elevator")
+		local entity = minetest.add_entity(pos, "fancy_elevator:elevator")
 		if entity ~= nil then
 			local yaw = elevator_func:round_yaw(placer:get_look_yaw(), 180)
 			entity:setyaw(yaw)
@@ -441,7 +443,9 @@ function elevator:stop_at_target(self, round_pos)
 	self.pos = self.object:getpos()
 	local pos = elevator_func:round_pos(self.pos)
 	pos.y = pos.y - 1
-	minetest.set_node(pos, {name="elevator:ground"})
+	if minetest.get_node(pos).name == "air" then
+		minetest.set_node(pos, {name="fancy_elevator:ground"})
+	end
 	self:organice()
 end
 

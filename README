@@ -1,4 +1,4 @@
-Elevator Mod [elevator] v0.1
+Elevator Mod [fancy_elevator] v0.2
 
 for Minetest
 
@@ -33,10 +33,6 @@ group:wood		default:stone
 -------------
 
 This is an early version of this mod, it isn't perfect and there are maybe some ugly bugs.
-
-Bugs:
-
-the camera of the player is ontop of the elevator and not in the elevator.
 
 -------------
 License of source code
