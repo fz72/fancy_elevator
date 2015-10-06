@@ -39,7 +39,7 @@ function elevator_doors.register_door(name, def)
 		def.sound_open_door = "door_open"
 	end
 	if not def.time_until_close then
-		def.time_until_close = 5
+		def.time_until_close = 15
 	end
 	
 	elevator_doors[name] = def
